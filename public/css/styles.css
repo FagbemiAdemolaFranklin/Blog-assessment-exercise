@@ -265,6 +265,10 @@ body {
     background-color: white;
 }
 
+.user-comment {
+    text-decoration: underline;
+}
+
 .comment-button p {
     margin-left: 10px;
 }
@@ -363,4 +367,24 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+.google-sign-up-link {
+    background-color: white;
+    border: 1px solid;
+    width: 100%;
+}
+.google-sign-in-link {
+    background-color: white;
+    border: 1px solid;
+    width: 100%;
+}
+
+.google-sign-up-link:hover{
+    border: 2px solid red;
+    color: white;
+}
+
+.google-sign-in-link:hover{
+    border: 2px solid red;
+    color: white;
 }
