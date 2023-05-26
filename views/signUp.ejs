@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/styles.css">
+    <title>signUp</title>
+</head>
+<body>
+    <div class="sign-up-container">
+        <div class="sign-up-inner-container">
+            <h1>SignUp</h1>
+            <div class="form-container">
+                <form action="/signUp" method="post">
+                    <input class="form-params" type="text" required name="fullname" placeholder="fullname">
+                    <input class="form-params" type="email" required name="username" placeholder="email">
+                    <input class="form-params" type="password" required name="password" id="password1" 
+                    placeholder="password" 
+                    pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_=+-]).{8,16}$" 
+                    title="Password must at least one: uppercase letter, lowercase letter, 
+                    numeric value, special symbol and  be 8-12 characters">
+                    <input class="form-params" type="password" required  
+                    id="password2" placeholder="repeat password" 
+                    pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_=+-]).{8,16}$" 
+                    title="Password must at least one: uppercase letter, lowercase letter,
+                    numeric value, special symbol and  be 8-12 characters">
+                    <div class="passwords-do-not-match"></div>
+                    <button class="form-params" type="submit">SignUp</button>
+                    <a class="form-params" href="/signIn">SignIn</a>
+                </form>
+            </div>
+        </div>
+        
+    </div>
+    <script>
+        document.addEventListener("submit", function(event){
+            document.querySelectorAll("input").forEach(function(post){
+                var values = post.value;
+                var firstPassword = document.getElementById("password1").value
+                var secondPassword = document.getElementById("password2").value
+                if(values.length == 0 ){
+                    event.preventDefault();
+                    document.querySelector(".fill-in-all-fields").innerHTML = "<h5 style='display:inline'; > Please fill all required fields </h5>"
+                
+                }else if(firstPassword !== secondPassword){
+                    event.preventDefault();
+                    document.querySelector(".passwords-do-not-match").innerHTML = "<h5 style = 'display:inline'> Passwords do not match </h5>"
+                }
+               
+            })
+        })
+    </script>
+</body>
+</html>
