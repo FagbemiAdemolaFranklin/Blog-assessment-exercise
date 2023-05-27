@@ -19,7 +19,12 @@ app.set("view engine", "ejs");
 app.use(expressSession({
     secret:process.env.SECRET,
     saveUninitialized:false,
-    resave:false
+    resave:false,
+    cookie:{
+        secure:true,
+        httpOnly:false,
+        maxAge: 30 * 24 * 60 * 60 * 1000
+    }
 }))
 
 app.use(passport.initialize());
