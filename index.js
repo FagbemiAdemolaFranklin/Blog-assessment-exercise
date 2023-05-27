@@ -10,7 +10,7 @@ const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 var currentUsername = "";
-var fullname = "";
+var currnetFullname = "";
 app.set('trust proxy', 1);
 app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.urlencoded({extended:true}));
@@ -89,7 +89,7 @@ async function main() {
     app.get("/", (request, respose) => {
         respose.render("home");
     });
-    
+
     app.get("/auth/google",
         passport.authenticate("google", { scope: ["profile","email"] })
     );
@@ -201,7 +201,7 @@ async function main() {
         try{
             if(addcomment) {
                 var commentDetails = {
-                    user:fullname,
+                    user:currnetFullname,
                     comment:comment
                 }
                 await blogs.findOne({_id:addcomment}).then((foundDocument) => {
@@ -213,7 +213,7 @@ async function main() {
                 var newBlog = new blogs ({
                     blog:[{
                         author:{
-                            fullname:fullname,
+                            fullname:currnetFullname,
                             username:currentUsername
                         },
                         title:title,
