@@ -10,7 +10,6 @@ const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 var currentUsername = "";
-var currnetFullname = "";
 app.set('trust proxy', 1);
 app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.urlencoded({extended:true}));
@@ -19,7 +18,6 @@ app.use(expressSession({
     secret:process.env.SECRET,
     saveUninitialized:false,
     resave:false
-    
 }))
 
 app.use(passport.initialize());
@@ -32,7 +30,11 @@ async function main() {
         await mongoose.connect(process.env.MONGO_URI);
         console.log("sucess")
     }catch(err) {
-        console.log(err);
+        if(err){
+            console.log(err);
+            
+        }
+        
     }
 
     // All through this module, username === email 
@@ -73,7 +75,7 @@ async function main() {
     passport.use(new GoogleStrategy({
         clientID: process.env.CLIENT_ID,
         clientSecret: process.env.CLIENT_SECRET,
-        callbackURL: "https://angry-clam-galoshes.cyclic.app/auth/google/blogs",
+        callbackURL: "http://localhost:3000/auth/google/blogs",
         userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
       },
       function(accessToken, refreshToken, profile, cb) {
@@ -88,8 +90,11 @@ async function main() {
 
     app.get("/", (request, respose) => {
         respose.render("home");
-    });
+    })
 
+    app.get("/signUp", (request, response) => {
+        response.render("signUp")
+    })
     app.get("/auth/google",
         passport.authenticate("google", { scope: ["profile","email"] })
     );
@@ -99,9 +104,6 @@ async function main() {
         function(request, response) {
         response.redirect("/blogs");
     });
-    app.get("/signUp", (request, response) => {
-        response.render("signUp")
-    })
 
     app.post("/signUp", (request,response) => {
         const {fullname, username, password} = request.body;
@@ -116,7 +118,6 @@ async function main() {
                         'Content-Type': 'text/plain'
                     }).end(body);
                 }else{
-                    currnetFullname = fullname;
                     response.redirect("/signIn")
                 }
             })
@@ -133,6 +134,7 @@ async function main() {
 
     app.post("/signIn", async (request, response) => {
         const {username, password} = request.body;
+        currentUsername = username;
         try{
             var currentUser = new users ({
                 username:username,
@@ -144,7 +146,7 @@ async function main() {
                 }else{
                     await passport.authenticate("local", 
                     {failureRedirect:"/signIn",
-                     failureFlash:true})
+                    })
                     (request, response, (err) => {
                         if(err) {
                             console.log(err);
@@ -156,7 +158,6 @@ async function main() {
                             })
                             .end(body);
                         }else{
-                            currentUsername = username;
                             response.redirect("/blogs");
                         }
                         
@@ -171,19 +172,25 @@ async function main() {
     });
  
     app.get("/blogs", async (request, response) => {
+        console.log(request.session)
+        const {username, fullname} = request.session.passport.user;
+        
         try{
             if(request.isAuthenticated()) {
                 await blogs.find({}).then((foundBlogs) => {
                     foundBlogs.forEach((blogss) => {
-                        var checkViews = blogss.blog[0].views.includes(currentUsername)
+                        var checkViews = blogss.blog[0].views.includes(username)
                         if(!checkViews){
-                        var addViews =  blogss.blog[0].views.push(currentUsername);
+                        var addViews =  blogss.blog[0].views.push(username);
                         blogss.save();
                         }
                         
                     });
                     
                     response.render("blogs", {requestedBlogs:foundBlogs});
+                }).catch((err) => {
+                    console.log(err);
+                    response.redirect(("/signIn"));
                 })
             }else if(request.user === null){
                 response.redirect("/signIn");
@@ -196,25 +203,26 @@ async function main() {
     });
 
     app.post("/blogs", async (request, response) => {
+        const {username, fullname} = request.user;
         const {comment, submit, title, content, addcomment, like} = request.body
         console.log(addcomment);
         try{
             if(addcomment) {
                 var commentDetails = {
-                    user:currnetFullname,
+                    user:fullname,
                     comment:comment
                 }
                 await blogs.findOne({_id:addcomment}).then((foundDocument) => {
-                    foundDocument.blog[0].comments.push(commentDetails);
-                    foundDocument.save();
-                }); 
+                foundDocument.blog[0].comments.push(commentDetails);
+                foundDocument.save();
                 response.redirect("/blogs");
+                }); 
             }else if (submit) {
                 var newBlog = new blogs ({
                     blog:[{
                         author:{
-                            fullname:currnetFullname,
-                            username:currentUsername
+                            fullname:fullname,
+                            username:username
                         },
                         title:title,
                         content:content 
@@ -224,9 +232,9 @@ async function main() {
                 response.redirect("/blogs");
             }else if(like){
                 await blogs.findOne({_id:like}).then((foundDocument) => {
-                    var checkLikes = foundDocument.blog[0].likes.includes(currentUsername);
+                    var checkLikes = foundDocument.blog[0].likes.includes(username);
                     if(!checkLikes){
-                        foundDocument.blog[0].likes.push(currentUsername);
+                        foundDocument.blog[0].likes.push(username);
                         foundDocument.save();
                     }
                     response.redirect("/blogs");
