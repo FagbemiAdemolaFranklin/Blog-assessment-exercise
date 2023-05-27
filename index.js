@@ -8,7 +8,6 @@ const ejs = require("ejs");
 const expressSession = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
-const connectEnsureLogin = require("connect-ensure-login");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 
 app.set('trust proxy', 1);
@@ -168,7 +167,7 @@ async function main() {
         
     });
  
-    app.get("/blogs", connectEnsureLogin.ensureLoggedIn("/signIn"), async (request, response) => {
+    app.get("/blogs", async (request, response) => {
         const {username,fullname} = request.user;
         try{
             if(request.isAuthenticated) {
@@ -198,7 +197,7 @@ async function main() {
 
     app.post("/blogs", async (request, response) => {
         const {username,fullname} = request.user;
-        var {comment, submit, title, content, addcomment, like} = request.body
+        var {comment, newblog, title, content, addcomment, like} = request.body
         console.log(addcomment);
         try{
             if(addcomment) {
@@ -235,8 +234,6 @@ async function main() {
                 }).catch((err) => {
                     console.log(err);
                 }); 
-            }else{
-                response.render("home");
             }
         }catch(err){
             console.log(err);
