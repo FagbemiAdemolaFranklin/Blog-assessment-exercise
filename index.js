@@ -170,7 +170,8 @@ async function main() {
     });
  
     app.get("/blogs", connectEnsureLogin.ensureLoggedIn("/signIn"), async (request, response) => {
-        var {username,fullname} = await request.session.passport.user;
+        var {username,fullname} = await request.session.passport;
+        console.log(request.session);
         try{
             if(request.isAuthenticated) {
                 await blogs.find({}).then((foundBlogs) => {
@@ -198,7 +199,8 @@ async function main() {
     });
 
     app.post("/blogs", async (request, response) => {
-        var {username,fullname} = await request.session.passport.user;
+        console.log(request.session.cookie);
+        var {username,fullname} = await request.session.passport;
         console.log(username + fullname)
         var {comment, submit, title, content, addcomment, like} = request.body
         console.log(addcomment);
