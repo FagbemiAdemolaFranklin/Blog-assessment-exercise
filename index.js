@@ -168,11 +168,10 @@ async function main() {
     });
  
     app.get("/blogs", async (request, response) => {
-        request.session.reload(function(){
-            const {username,fullname} = request.user
-        });
         try{
             if(request.isAuthenticated()) {
+                const {username,fullname} = request.user;
+                console.log(username + fullname);
                 await blogs.find({}).then((foundBlogs) => {
                     foundBlogs.forEach((blogss) => {
                         var checkViews = blogss.blog[0].views.includes(username)
@@ -184,10 +183,8 @@ async function main() {
                     });
                     
                     response.render("blogs", {requestedBlogs:foundBlogs});
-                }).catch((err) => {
-                    console.log(err);
                 })
-            }else if(request.session.passport.user === null){
+            }else if(request.user === null){
                 response.redirect("/signIn");
             }
         }catch(err) {
@@ -233,9 +230,7 @@ async function main() {
                         foundDocument.save();
                     }
                     response.redirect("/blogs");
-                }).catch((err) => {
-                    console.log(err);
-                }); 
+                }) 
             }
         }catch(err){
             console.log(err);
