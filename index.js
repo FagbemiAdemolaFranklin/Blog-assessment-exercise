@@ -172,7 +172,8 @@ async function main() {
     });
  
     app.get("/blogs", async (request, response) => {
-        const username = await request.session.passport.user.username;
+        const passport = await request.session.passport;
+        const{username, fullname} = passport.user;
         try{
             
             await blogs.find({}).then((foundBlogs) => {
@@ -199,8 +200,8 @@ async function main() {
     });
 
     app.post("/blogs", async (request, response) => {
-        const username = await request.session.passport.user.username;
-        const fullname = await request.session.passport.user.fullname;
+        const passport = await request.session.passport;
+        const{username, fullname} = passport.user;
         var {comment, submit, title, content, addcomment, like} = request.body
         if(addcomment) {
             var commentDetails = {
