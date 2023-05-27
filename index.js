@@ -8,8 +8,8 @@ const ejs = require("ejs");
 const expressSession = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
+const connectEnsureLogin = require("connect-ensure-login");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const request = require("request");
 
 
 app.set('trust proxy', 1);
@@ -30,6 +30,7 @@ main().catch((err) => {console.log(err)});
 async function main() {
     try {
         await mongoose.connect(process.env.MONGO_URI);
+        console.log("sucess")
     }catch(err) {
         console.log(err);
     }
@@ -140,12 +141,14 @@ async function main() {
                 if(err) {
                     console.log(err);
                 }else{
-                    passport.authenticate("local", 
-                    {failureRedirect:"/signIn",failureFlash:true})
+                    await passport.authenticate("local", 
+                    {failureRedirect:"/signIn",
+                    failWithError:false, 
+                    failureMessage:"Incorrectusername or password"})
                     (request, response, (err) => {
                         if(err) {
                             console.log(err);
-                            const body = "Incorrect username or password"
+                            const body = "Incorrectusername or password"
                             response
                             .writeHead(401, {
                                 'Content-Length': Buffer.byteLength(body),
@@ -166,35 +169,39 @@ async function main() {
         
     });
  
-    app.get("/blogs", async (request, response) => {
-        
-        if(request.isAuthenticated){
-            await blogs.find({}).then((foundBlogs) => {
-                foundBlogs.forEach((blogss) => {
-                    var checkViews = blogss.blog[0].views.includes(request.session.passport.user.username)
-                    if(!checkViews){
-                        var addViews =  blogss.blog[0].views.push(request.session.passport.user.username);
+    app.get("/blogs", connectEnsureLogin.ensureLoggedIn("/signIn"), async (request, response) => {
+        var {username,fullname} = request.session.passport.user;
+        try{
+            if(request.isAuthenticated) {
+                await blogs.find({}).then((foundBlogs) => {
+                    foundBlogs.forEach((blogss) => {
+                        var checkViews = blogss.blog[0].views.includes(username)
+                        if(!checkViews){
+                        var addViews =  blogss.blog[0].views.push(username);
                         blogss.save();
+                        }
                         
-                    }
+                    });
+                    
                     response.render("blogs", {requestedBlogs:foundBlogs});
-                });
-            })
-        }else{
-            console.log("Not Authenticated");
+                }).catch((err) => {
+                    console.log(err);
+                })
+            }else if(request.session.pasport.user === null){
+                response.redirect("/signIn");
+            }
+        }catch(err) {
+            console.log(err);
             response.redirect("/signIn");
         }
-            
-            
-        
         
     });
 
     app.post("/blogs", async (request, response) => {
+        var {username,fullname} = request.session.passport.user;
+        var {comment, submit, title, content, addcomment, like} = request.body
+        console.log(addcomment);
         try{
-            const passport = request.session.passport;
-            const{username, fullname} = passport.user;
-            var {comment, submit, title, content, addcomment, like} = request.body
             if(addcomment) {
                 var commentDetails = {
                     user:fullname,
@@ -213,7 +220,7 @@ async function main() {
                             username:username
                         },
                         title:title,
-                        content:content
+                        content:content 
                     }]
                 })
                 await newBlog.save();
@@ -224,19 +231,19 @@ async function main() {
                     if(!checkLikes){
                         foundDocument.blog[0].likes.push(username);
                         foundDocument.save();
-                        response.redirect("/blogs");
-                    }else{
-                        response.redirect("/blogs");
                     }
-                
+                    response.redirect("/blogs");
                 }).catch((err) => {
                     console.log(err);
                 }); 
+            }else{
+                response.render("home");
             }
         }catch(err){
             console.log(err);
-            response.redirect("/blogs");
+            response.redirect("/blogs")
         }
+        
     });
 
     app.get("/logOut", async (request, response) => {
