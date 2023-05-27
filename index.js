@@ -199,7 +199,7 @@ async function main() {
     });
 
     app.post("/blogs", async (request, response) => {
-        const {username,fullname} = request.user;
+        const {username,fullname} = request.session.passport.user;
         const {comment, newblog, title, content, addcomment, like} = request.body
         console.log(addcomment);
         try{
