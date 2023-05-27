@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded({extended:true}));
 app.set("view engine", "ejs");
 app.use(expressSession({
     secret:process.env.SECRET,
-    saveUninitialized:true,
+    saveUninitialized:false,
     resave:false,
     cookies:{
         secure:true
