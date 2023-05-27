@@ -116,7 +116,7 @@ async function main() {
                         'Content-Type': 'text/plain'
                     }).end(body);
                 }else{
-                    fullname = fullname;
+                    currnetFullname = fullname;
                     response.redirect("/signIn")
                 }
             })
