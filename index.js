@@ -90,11 +90,11 @@ async function main() {
    
 
     app.get("/", (request, respose) => {
-        respose.render("Home");
+        respose.render("home");
     })
 
     app.get("/signUp", (request, response) => {
-        response.render("SignUp")
+        response.render("signUp")
     })
     app.get("/auth/google",
         passport.authenticate("google", { scope: ["profile","email"] })
@@ -260,7 +260,7 @@ async function main() {
     })
 
     app.listen(process.env.PORT || "3000", () => {
-        console.log("Running on port 600");
+        console.log("Running on port 3000");
     })
 
 }
