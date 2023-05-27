@@ -175,11 +175,9 @@ async function main() {
                     if(!checkViews){
                         var addViews =  blogss.blog[0].views.push(request.session.passport.user.username);
                         blogss.save();
-                        response.render("blogs", {requestedBlogs:foundBlogs});
-                    }else{
-                        response.render("blogs", {requestedBlogs:foundBlogs});
+                        
                     }
-                    
+                    response.render("blogs", {requestedBlogs:foundBlogs});
                 });
             })
         }else{
