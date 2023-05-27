@@ -167,31 +167,28 @@ async function main() {
     });
  
     app.get("/blogs", async (request, response) => {
-        try{
-            if(request.isAuthenticated){
-                await blogs.find({}).then((foundBlogs) => {
-                    foundBlogs.forEach((blogss) => {
-                        var checkViews = blogss.blog[0].views.includes(request.session.passport.user.username)
-                        if(!checkViews){
-                            var addViews =  blogss.blog[0].views.push(request.session.passport.user.username);
-                            blogss.save();
-                            response.render("blogs", {requestedBlogs:foundBlogs});
-                        }else{
-                            response.render("blogs", {requestedBlogs:foundBlogs});
-                        }
-                        
-                    });
-                })
-            }else{
-                console.log("Not Authenticated");
-                response.redirect("/signIn");
-            }
-            
-            
-        }catch(err) {
-            console.log(err);
+        
+        if(request.isAuthenticated){
+            await blogs.find({}).then((foundBlogs) => {
+                foundBlogs.forEach((blogss) => {
+                    var checkViews = blogss.blog[0].views.includes(request.session.passport.user.username)
+                    if(!checkViews){
+                        var addViews =  blogss.blog[0].views.push(request.session.passport.user.username);
+                        blogss.save();
+                        response.render("blogs", {requestedBlogs:foundBlogs});
+                    }else{
+                        response.render("blogs", {requestedBlogs:foundBlogs});
+                    }
+                    
+                });
+            })
+        }else{
+            console.log("Not Authenticated");
             response.redirect("/signIn");
         }
+            
+            
+        
         
     });
 
