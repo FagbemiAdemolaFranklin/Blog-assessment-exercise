@@ -10,8 +10,6 @@ const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const connectEnsureLogin = require("connect-ensure-login");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-var currentUsername = ""
-var currentFullname = ""
 
 app.set('trust proxy', 1);
 app.use(express.static(__dirname + "/public"));
@@ -132,7 +130,7 @@ async function main() {
     });
 
     app.post("/signIn", async (request, response) => {
-        var {username, password} = request.body;
+        const {username, password} = request.body;
         try{
             var currentUser = new users ({
                 username:username,
@@ -171,50 +169,26 @@ async function main() {
     });
  
     app.get("/blogs", connectEnsureLogin.ensureLoggedIn("/signIn"), async (request, response) => {
+        const {username,fullname} = request.user;
         try{
-            var {username,fullname} = request.user;
-            if(username) {
-                currentUsername = username;
-                currentFullname = fullname
-                if(request.isAuthenticated) {
-                    await blogs.find({}).then((foundBlogs) => {
-                        foundBlogs.forEach((blogss) => {
-                            var checkViews = blogss.blog[0].views.includes(username)
-                            if(!checkViews){
-                            var addViews =  blogss.blog[0].views.push(username);
-                            blogss.save();
-                            }
-                            
-                        });
+            if(request.isAuthenticated) {
+                await blogs.find({}).then((foundBlogs) => {
+                    foundBlogs.forEach((blogss) => {
+                        var checkViews = blogss.blog[0].views.includes(username)
+                        if(!checkViews){
+                        var addViews =  blogss.blog[0].views.push(username);
+                        blogss.save();
+                        }
                         
-                        response.render("blogs", {requestedBlogs:foundBlogs});
-                    }).catch((err) => {
-                        console.log(err);
-                    })
-                }else if(request.session.pasport.user === null){
-                    response.redirect("/signIn");
-                }
-            }else {
-                if(request.isAuthenticated) {
-                    await blogs.find({}).then((foundBlogs) => {
-                        foundBlogs.forEach((blogss) => {
-                            var checkViews = blogss.blog[0].views.includes(currentUsername)
-                            if(!checkViews){
-                            var addViews =  blogss.blog[0].views.push(currentUsername);
-                            blogss.save();
-                            }
-                            
-                        });
-                        
-                        response.render("blogs", {requestedBlogs:foundBlogs});
-                    }).catch((err) => {
-                        console.log(err);
-                    })
-                }else if(request.session.pasport.user === null){
-                    response.redirect("/signIn");
-                }
+                    });
+                    
+                    response.render("blogs", {requestedBlogs:foundBlogs});
+                }).catch((err) => {
+                    console.log(err);
+                })
+            }else if(request.session.pasport.user === null){
+                response.redirect("/signIn");
             }
-           
         }catch(err) {
             console.log(err);
             response.redirect("/signIn");
@@ -223,7 +197,7 @@ async function main() {
     });
 
     app.post("/blogs", async (request, response) => {
-        var {username,fullname} = request.user;
+        const {username,fullname} = request.user;
         var {comment, submit, title, content, addcomment, like} = request.body
         console.log(addcomment);
         try{
