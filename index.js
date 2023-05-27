@@ -175,7 +175,7 @@ async function main() {
         
     });
  
-    app.get("/blogs", connectEnsureLogin("/signIn") async (request, response) => {
+    app.get("/blogs", connectEnsureLogin("/signIn"), async (request, response) => {
         const {username,fullname} = await request.session.passport.user;
         username == username
         fullname == fullname
