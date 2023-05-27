@@ -19,10 +19,7 @@ app.set("view engine", "ejs");
 app.use(expressSession({
     secret:process.env.SECRET,
     saveUninitialized:false,
-    resave:false,
-    cookies:{
-        secure:true
-    }
+    resave:false
 }))
 
 app.use(passport.initialize());
@@ -173,7 +170,7 @@ async function main() {
     });
  
     app.get("/blogs", connectEnsureLogin.ensureLoggedIn("/signIn"), async (request, response) => {
-        var {username,fullname} = request.session.passport.user;
+        var {username,fullname} = await request.session.passport.user;
         try{
             if(request.isAuthenticated) {
                 await blogs.find({}).then((foundBlogs) => {
@@ -201,7 +198,8 @@ async function main() {
     });
 
     app.post("/blogs", async (request, response) => {
-        var {username,fullname} = request.session.passport.user;
+        var {username,fullname} = await request.session.passport.user;
+        console.log(username + fullname)
         var {comment, submit, title, content, addcomment, like} = request.body
         console.log(addcomment);
         try{
