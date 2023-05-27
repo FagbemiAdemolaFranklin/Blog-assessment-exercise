@@ -168,7 +168,9 @@ async function main() {
     });
  
     app.get("/blogs", async (request, response) => {
-        const {username,fullname} = request.user;
+        request.session.reload(function(){
+            const {username,fullname} = request.user
+        });
         try{
             if(request.isAuthenticated()) {
                 await blogs.find({}).then((foundBlogs) => {
