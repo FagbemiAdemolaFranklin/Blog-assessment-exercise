@@ -116,7 +116,7 @@ async function main() {
                         'Content-Type': 'text/plain'
                     }).end(body);
                 }else{
-                    currnetFullname = fullname;
+                    currnetFullname == fullname;
                     response.redirect("/signIn")
                 }
             })
@@ -133,7 +133,7 @@ async function main() {
 
     app.post("/signIn", async (request, response) => {
         const {username, password} = request.body;
-        currentUsername = username;
+        currentUsername == username;
         try{
             var currentUser = new users ({
                 username:username,
