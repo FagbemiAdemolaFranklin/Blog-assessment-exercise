@@ -8,7 +8,6 @@ const ejs = require("ejs");
 const expressSession = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
-const connectEnsureLogin = require('connect-ensure-login').ensureLoggedIn();
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 var username = ""
 var fullname = ""
@@ -175,7 +174,7 @@ async function main() {
         
     });
  
-    app.get("/blogs", connectEnsureLogin("/signIn"), async (request, response) => {
+    app.get("/blogs", async (request, response) => {
         const {username,fullname} = await request.session.passport.user;
         username == username
         fullname == fullname
