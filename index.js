@@ -146,9 +146,7 @@ async function main() {
                     console.log(err);
                 }else{
                     await passport.authenticate("local", 
-                    {failureRedirect:"/signIn",
-                    failWithError:false, 
-                    failureMessage:"Incorrectusername or password"})
+                    {failureRedirect:"/signIn",failureFlash:true})
                     (request, response, (err) => {
                         if(err) {
                             console.log(err);
