@@ -9,19 +9,16 @@ const expressSession = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-
+var currentUsername = "";
 app.set('trust proxy', 1);
 app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.urlencoded({extended:true}));
 app.set("view engine", "ejs");
 app.use(expressSession({
     secret:process.env.SECRET,
-    saveUninitialized:true,
+    saveUninitialized:false,
     resave:false,
-    cookie:{
-        httpOnly:false,
-        secure:true,
-    }
+    
 }))
 
 app.use(passport.initialize());
@@ -134,6 +131,7 @@ async function main() {
 
     app.post("/signIn", async (request, response) => {
         const {username, password} = request.body;
+        currentUsername = username;
         try{
             var currentUser = new users ({
                 username:username,
@@ -145,8 +143,7 @@ async function main() {
                 }else{
                     await passport.authenticate("local", 
                     {failureRedirect:"/signIn",
-                    failWithError:false, 
-                    failureMessage:"Incorrectusername or password"})
+                     failureFlash:true})
                     (request, response, (err) => {
                         if(err) {
                             console.log(err);
@@ -172,15 +169,16 @@ async function main() {
     });
  
     app.get("/blogs", async (request, response) => {
+        console.log(request.session)
+        const {fullname} = request.user;
+        
         try{
             if(request.isAuthenticated()) {
-                const {username,fullname} = request.user;
-                console.log(username + fullname);
                 await blogs.find({}).then((foundBlogs) => {
                     foundBlogs.forEach((blogss) => {
-                        var checkViews = blogss.blog[0].views.includes(username)
+                        var checkViews = blogss.blog[0].views.includes(currentUsername)
                         if(!checkViews){
-                        var addViews =  blogss.blog[0].views.push(username);
+                        var addViews =  blogss.blog[0].views.push(currentUsername);
                         blogss.save();
                         }
                         
@@ -199,7 +197,8 @@ async function main() {
     });
 
     app.post("/blogs", async (request, response) => {
-        const {username,fullname} = request.session.passport.user;
+    
+        const {fullname} = request.user;
         const {comment, newblog, title, content, addcomment, like} = request.body
         console.log(addcomment);
         try{
@@ -218,7 +217,7 @@ async function main() {
                     blog:[{
                         author:{
                             fullname:fullname,
-                            username:username
+                            username:currentUsername
                         },
                         title:title,
                         content:content 
@@ -228,9 +227,9 @@ async function main() {
                 response.redirect("/blogs");
             }else if(like){
                 await blogs.findOne({_id:like}).then((foundDocument) => {
-                    var checkLikes = foundDocument.blog[0].likes.includes(username);
+                    var checkLikes = foundDocument.blog[0].likes.includes(currentUsername);
                     if(!checkLikes){
-                        foundDocument.blog[0].likes.push(username);
+                        foundDocument.blog[0].likes.push(currentUsername);
                         foundDocument.save();
                     }
                     response.redirect("/blogs");
@@ -240,6 +239,9 @@ async function main() {
             console.log(err);
             response.redirect("/blogs")
         }
+    
+        
+        
         
     });
 
