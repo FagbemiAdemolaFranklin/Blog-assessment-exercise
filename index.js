@@ -177,9 +177,8 @@ async function main() {
  
     app.get("/blogs", connectEnsureLogin.ensureLoggedIn("/signIn"), async (request, response) => {
         var {usernames,fullnames} = await request.session.passport.user;
-        username = usernames
-        fullname = fullnames;
-        console.log(request.session);
+        username == usernames
+        fullname == fullnames
         try{
             if(request.isAuthenticated) {
                 await blogs.find({}).then((foundBlogs) => {
@@ -208,8 +207,6 @@ async function main() {
 
     app.post("/blogs", async (request, response) => {
         var {comment, submit, title, content, addcomment, like} = request.body
-        console.log(addcomment);
-      
         if(addcomment) {
             var commentDetails = {
                 user:fullname,
@@ -239,15 +236,15 @@ async function main() {
                 if(!checkLikes){
                     foundDocument.blog[0].likes.push(username);
                     foundDocument.save();
+                    response.redirect("/blogs");
+                }else{
+                    response.redirect("/blogs");
                 }
-                response.redirect("/blogs");
+               
             }).catch((err) => {
                 console.log(err);
             }); 
-        }else if(username === null || fullname === null){
-            response.redirect("/signIn");
-        }
-        else{
+        }else{
             response.render("home");
         }
         
