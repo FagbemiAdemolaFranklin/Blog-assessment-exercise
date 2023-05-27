@@ -19,7 +19,7 @@ app.set("view engine", "ejs");
 app.use(expressSession({
     secret:process.env.SECRET,
     saveUninitialized:false,
-    resave:false
+    resave:true
 }))
 
 app.use(passport.initialize());
