@@ -10,6 +10,7 @@ const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 var currentUsername = "";
+var fullname = "";
 app.set('trust proxy', 1);
 app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.urlencoded({extended:true}));
@@ -87,11 +88,8 @@ async function main() {
 
     app.get("/", (request, respose) => {
         respose.render("home");
-    })
-
-    app.get("/signUp", (request, response) => {
-        response.render("signUp")
-    })
+    });
+    
     app.get("/auth/google",
         passport.authenticate("google", { scope: ["profile","email"] })
     );
@@ -101,6 +99,9 @@ async function main() {
         function(request, response) {
         response.redirect("/blogs");
     });
+    app.get("/signUp", (request, response) => {
+        response.render("signUp")
+    })
 
     app.post("/signUp", (request,response) => {
         const {fullname, username, password} = request.body;
@@ -115,6 +116,7 @@ async function main() {
                         'Content-Type': 'text/plain'
                     }).end(body);
                 }else{
+                    fullname = fullname;
                     response.redirect("/signIn")
                 }
             })
@@ -169,9 +171,6 @@ async function main() {
     });
  
     app.get("/blogs", async (request, response) => {
-        console.log(request.session)
-        const {fullname} = request.user;
-        
         try{
             if(request.isAuthenticated()) {
                 await blogs.find({}).then((foundBlogs) => {
@@ -197,8 +196,6 @@ async function main() {
     });
 
     app.post("/blogs", async (request, response) => {
-    
-        const {fullname} = request.user;
         const {comment, newblog, title, content, addcomment, like} = request.body
         console.log(addcomment);
         try{
