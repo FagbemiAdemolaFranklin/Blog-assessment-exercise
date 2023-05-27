@@ -17,7 +17,11 @@ app.set("view engine", "ejs");
 app.use(expressSession({
     secret:process.env.SECRET,
     saveUninitialized:true,
-    resave:false
+    resave:false,
+    cookie:{
+        httpOnly:false,
+        secure:true,
+    }
 }))
 
 app.use(passport.initialize());
@@ -102,7 +106,7 @@ async function main() {
     });
 
     app.post("/signUp", (request,response) => {
-        var {fullname, username, password} = request.body;
+        const {fullname, username, password} = request.body;
         try{
             users.register({username:username,fullname:fullname}, password, (err) => {
                 if(err) {
@@ -196,7 +200,7 @@ async function main() {
 
     app.post("/blogs", async (request, response) => {
         const {username,fullname} = request.user;
-        var {comment, newblog, title, content, addcomment, like} = request.body
+        const {comment, newblog, title, content, addcomment, like} = request.body
         console.log(addcomment);
         try{
             if(addcomment) {
