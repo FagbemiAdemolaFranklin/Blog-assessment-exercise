@@ -18,7 +18,7 @@ app.set("view engine", "ejs");
 app.use(expressSession({
     secret:process.env.SECRET,
     saveUninitialized:false,
-    resave:false,
+    resave:false
     
 }))
 
@@ -116,7 +116,7 @@ async function main() {
                         'Content-Type': 'text/plain'
                     }).end(body);
                 }else{
-                    currnetFullname == fullname;
+                    currnetFullname === fullname;
                     response.redirect("/signIn")
                 }
             })
@@ -133,7 +133,6 @@ async function main() {
 
     app.post("/signIn", async (request, response) => {
         const {username, password} = request.body;
-        currentUsername == username;
         try{
             var currentUser = new users ({
                 username:username,
@@ -157,6 +156,7 @@ async function main() {
                             })
                             .end(body);
                         }else{
+                            currentUsername === username;
                             response.redirect("/blogs");
                         }
                         
@@ -205,10 +205,10 @@ async function main() {
                     comment:comment
                 }
                 await blogs.findOne({_id:addcomment}).then((foundDocument) => {
-                foundDocument.blog[0].comments.push(commentDetails);
-                foundDocument.save();
-                response.redirect("/blogs");
+                    foundDocument.blog[0].comments.push(commentDetails);
+                    foundDocument.save();
                 }); 
+                response.redirect("/blogs");
             }else if (submit) {
                 var newBlog = new blogs ({
                     blog:[{
