@@ -8,7 +8,6 @@ const ejs = require("ejs");
 const expressSession = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
-const { request } = require("http");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const request = require("request");
 
