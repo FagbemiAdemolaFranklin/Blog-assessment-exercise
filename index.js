@@ -8,7 +8,7 @@ const ejs = require("ejs");
 const expressSession = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
-
+const connectEnsureLogin = require('connect-ensure-login')
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 
 
@@ -108,19 +108,25 @@ async function main() {
 
     app.post("/signUp", (request,response) => {
         var {fullname, username, password} = request.body;
-        users.register({username:username,fullname:fullname}, password, (err) => {
-            if(err) {
-                console.log(err);
-                const body = "username is already taken"
-                response
-                .writeHead(401, {
-                    'Content-Length': Buffer.byteLength(body),
-                    'Content-Type': 'text/plain'
-                }).end(body);
-            }else{
-                response.redirect("/signIn")
-            }
-        })
+        try{
+            users.register({username:username,fullname:fullname}, password, (err) => {
+                if(err) {
+                    console.log(err);
+                    const body = "username is already taken"
+                    response
+                    .writeHead(401, {
+                        'Content-Length': Buffer.byteLength(body),
+                        'Content-Type': 'text/plain'
+                    }).end(body);
+                }else{
+                    response.redirect("/signIn")
+                }
+            })
+        }catch(err) {
+            console.log(err);
+            response.redirect("/signUp");
+        }
+        
     })
 
     app.get("/signIn", (request, response) => {
@@ -128,8 +134,8 @@ async function main() {
     });
 
     app.post("/signIn", async (request, response) => {
+        var {username, password} = request.body;
         try{
-            var {username, password} = request.body;
             var currentUser = new users ({
                 username:username,
                 password:password
@@ -166,9 +172,9 @@ async function main() {
         
     });
  
-    app.get("/blogs", async (request, response) => {
+    app.get("/blogs", connectEnsureLogin.ensureLoggedIn("/signIn"), async (request, response) => {
+        var {username,fullname} = request.session.passport.user;
         try{
-            var {username,fullname} = request.session.passport.user;
             if(request.isAuthenticated) {
                 await blogs.find({}).then((foundBlogs) => {
                     foundBlogs.forEach((blogss) => {
@@ -184,6 +190,8 @@ async function main() {
                 }).catch((err) => {
                     console.log(err);
                 })
+            }else if(request.session.pasport.user === null){
+                response.redirect("/signIn");
             }
         }catch(err) {
             console.log(err);
@@ -193,11 +201,10 @@ async function main() {
     });
 
     app.post("/blogs", async (request, response) => {
+        var {username,fullname} = request.session.passport.user;
+        var {comment, submit, title, content, addcomment, like} = request.body
+        console.log(addcomment);
         try{
-            var {username,fullname} = request.session.passport.user;
-            var {comment, submit, title, content, addcomment, like} = request.body
-            console.log(addcomment);
-        
             if(addcomment) {
                 var commentDetails = {
                     user:fullname,
