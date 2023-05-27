@@ -19,7 +19,7 @@ app.set("view engine", "ejs");
 app.use(expressSession({
     secret:process.env.SECRET,
     saveUninitialized:false,
-    resave:true,
+    resave:false,
     cookie:{
         secure:true,
         httpOnly:false,
@@ -182,13 +182,14 @@ async function main() {
                 foundBlogs.forEach((blogss) => {
                     var checkViews = blogss.blog[0].views.includes(username)
                     if(!checkViews){
-                    var addViews =  blogss.blog[0].views.push(username);
-                    blogss.save();
+                        var addViews =  blogss.blog[0].views.push(username);
+                        blogss.save();
+                        response.render("blogs", {requestedBlogs:foundBlogs});
+                    }else{
+                        response.render("blogs", {requestedBlogs:foundBlogs});
                     }
                     
                 });
-                
-                response.render("blogs", {requestedBlogs:foundBlogs});
             }).catch((err) => {
                 console.log(err);
             })
