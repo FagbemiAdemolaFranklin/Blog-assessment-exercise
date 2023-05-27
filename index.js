@@ -175,7 +175,7 @@ async function main() {
         
     });
  
-    app.get("/blogs", connectEnsureLogin.ensureLoggedIn("/signIn"), async (request, response) => {
+    app.get("/blogs", async (request, response) => {
         var {usernames,fullnames} = await request.session.passport.user;
         username == usernames
         fullname == fullnames
@@ -195,8 +195,6 @@ async function main() {
                 }).catch((err) => {
                     console.log(err);
                 })
-            }else if(username === null){
-                response.redirect("/signIn");
             }
         }catch(err) {
             console.log(err);
