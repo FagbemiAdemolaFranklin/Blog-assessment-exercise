@@ -19,7 +19,10 @@ app.set("view engine", "ejs");
 app.use(expressSession({
     secret:process.env.SECRET,
     saveUninitialized:true,
-    resave:false
+    resave:false,
+    cookies:{
+        secure:true
+    }
 }))
 
 app.use(passport.initialize());
@@ -29,7 +32,7 @@ mongoose.set("strictQuery", false);
 main().catch((err) => {console.log(err)});
 async function main() {
     try {
-        await mongoose.connect("mongodb://127.0.0.1:27017/blog-assessmentDB");
+        await mongoose.connect(process.env.MONGO_URI);
         console.log("sucess")
     }catch(err) {
         console.log(err);
@@ -73,7 +76,7 @@ async function main() {
     passport.use(new GoogleStrategy({
         clientID: process.env.CLIENT_ID,
         clientSecret: process.env.CLIENT_SECRET,
-        callbackURL: "http://localhost:3000/auth/google/blogs",
+        callbackURL: "https://angry-clam-galoshes.cyclic.app/auth/google/blogs",
         userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
       },
       function(accessToken, refreshToken, profile, cb) {
