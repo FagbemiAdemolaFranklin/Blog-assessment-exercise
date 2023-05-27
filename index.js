@@ -170,7 +170,7 @@ async function main() {
     });
  
     app.get("/blogs", connectEnsureLogin.ensureLoggedIn("/signIn"), async (request, response) => {
-        var {username,fullname} = await request.session.passport;
+        var {username,fullname} = await request.session.passport.user;
         console.log(request.session);
         try{
             if(request.isAuthenticated) {
@@ -188,7 +188,7 @@ async function main() {
                 }).catch((err) => {
                     console.log(err);
                 })
-            }else if(request.session.pasport.user === null){
+            }else if(username === null){
                 response.redirect("/signIn");
             }
         }catch(err) {
@@ -200,52 +200,49 @@ async function main() {
 
     app.post("/blogs", async (request, response) => {
         console.log(request.session.cookie);
-        var {username,fullname} = await request.session.passport;
+        var {username,fullname} = await request.session.passport.user;
         console.log(username + fullname)
         var {comment, submit, title, content, addcomment, like} = request.body
         console.log(addcomment);
-        try{
-            if(addcomment) {
-                var commentDetails = {
-                    user:fullname,
-                    comment:comment
-                }
-                await blogs.findOne({_id:addcomment}).then((foundDocument) => {
-                foundDocument.blog[0].comments.push(commentDetails);
-                foundDocument.save();
-                response.redirect("/blogs");
-                }); 
-            }else if (submit) {
-                var newBlog = new blogs ({
-                    blog:[{
-                        author:{
-                            fullname:fullname,
-                            username:username
-                        },
-                        title:title,
-                        content:content 
-                    }]
-                })
-                await newBlog.save();
-                response.redirect("/blogs");
-            }else if(like){
-                await blogs.findOne({_id:like}).then((foundDocument) => {
-                    var checkLikes = foundDocument.blog[0].likes.includes(username);
-                    if(!checkLikes){
-                        foundDocument.blog[0].likes.push(username);
-                        foundDocument.save();
-                    }
-                    response.redirect("/blogs");
-                }).catch((err) => {
-                    console.log(err);
-                }); 
-            }else{
-                response.render("home");
+      
+        if(addcomment) {
+            var commentDetails = {
+                user:fullname,
+                comment:comment
             }
-        }catch(err){
-            console.log(err);
-            response.redirect("/blogs")
+            await blogs.findOne({_id:addcomment}).then((foundDocument) => {
+            foundDocument.blog[0].comments.push(commentDetails);
+            foundDocument.save();
+            response.redirect("/blogs");
+            }); 
+        }else if (submit) {
+            var newBlog = new blogs ({
+                blog:[{
+                    author:{
+                        fullname:fullname,
+                        username:username
+                    },
+                    title:title,
+                    content:content
+                }]
+            })
+            await newBlog.save();
+            response.redirect("/blogs");
+        }else if(like){
+            await blogs.findOne({_id:like}).then((foundDocument) => {
+                var checkLikes = foundDocument.blog[0].likes.includes(username);
+                if(!checkLikes){
+                    foundDocument.blog[0].likes.push(username);
+                    foundDocument.save();
+                }
+                response.redirect("/blogs");
+            }).catch((err) => {
+                console.log(err);
+            }); 
+        }else{
+            response.render("home");
         }
+        
         
     });
 
