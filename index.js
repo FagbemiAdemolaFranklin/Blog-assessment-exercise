@@ -8,9 +8,9 @@ const ejs = require("ejs");
 const expressSession = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
+const { request } = require("http");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-var username = ""
-var fullname = ""
+
 
 app.set('trust proxy', 1);
 app.use(express.static(__dirname + "/public"));
@@ -19,7 +19,7 @@ app.set("view engine", "ejs");
 app.use(expressSession({
     secret:process.env.SECRET,
     saveUninitialized:false,
-    resave:false,
+    resave:true,
     cookie:{
         secure:true,
         httpOnly:false,
@@ -175,9 +175,7 @@ async function main() {
     });
  
     app.get("/blogs", async (request, response) => {
-        const {username,fullname} = await request.session.passport.user;
-        username == username
-        fullname == fullname
+        let {username,fullname} = await request.session.passport.user;
         try{
             
             await blogs.find({}).then((foundBlogs) => {
@@ -203,6 +201,7 @@ async function main() {
     });
 
     app.post("/blogs", async (request, response) => {
+        let {username,fullname} = await request.session.passport.user;
         var {comment, submit, title, content, addcomment, like} = request.body
         if(addcomment) {
             var commentDetails = {
