@@ -116,7 +116,7 @@ async function main() {
                         'Content-Type': 'text/plain'
                     }).end(body);
                 }else{
-                    currnetFullname === fullname;
+                    currnetFullname = fullname;
                     response.redirect("/signIn")
                 }
             })
@@ -156,7 +156,7 @@ async function main() {
                             })
                             .end(body);
                         }else{
-                            currentUsername === username;
+                            currentUsername = username;
                             response.redirect("/blogs");
                         }
                         
