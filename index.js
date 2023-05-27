@@ -76,8 +76,8 @@ async function main() {
       },
       function(accessToken, refreshToken, profile, cb) {
         console.log(profile);
-        users.findOrCreate({username:profile.emails[0].value, fullname:profile.name.familyName + " " + profile.name.givenName}, function (err, users) {
-          return cb(err, users);
+        users.findOrCreate({username:profile.emails[0].value, fullname:profile.name.familyName + " " + profile.name.givenName}, function (err, createdUser) {
+          return cb(err, createdUser);
         });
       }
     ));
@@ -170,7 +170,7 @@ async function main() {
     app.get("/blogs", async (request, response) => {
         const {username,fullname} = request.user;
         try{
-            if(request.isAuthenticated) {
+            if(request.isAuthenticated()) {
                 await blogs.find({}).then((foundBlogs) => {
                     foundBlogs.forEach((blogss) => {
                         var checkViews = blogss.blog[0].views.includes(username)
@@ -185,7 +185,7 @@ async function main() {
                 }).catch((err) => {
                     console.log(err);
                 })
-            }else if(request.session.pasport.user === null){
+            }else if(request.session.passport.user === null){
                 response.redirect("/signIn");
             }
         }catch(err) {
