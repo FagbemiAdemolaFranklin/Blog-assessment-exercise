@@ -175,27 +175,27 @@ async function main() {
         
     });
  
-    app.get("/blogs", async (request, response) => {
-        var {usernames,fullnames} = await request.session.passport.user;
-        username == usernames
-        fullname == fullnames
+    app.get("/blogs", connectEnsureLogin("/signIn") async (request, response) => {
+        const {username,fullname} = await request.session.passport.user;
+        username == username
+        fullname == fullname
         try{
-            if(request.isAuthenticated) {
-                await blogs.find({}).then((foundBlogs) => {
-                    foundBlogs.forEach((blogss) => {
-                        var checkViews = blogss.blog[0].views.includes(username)
-                        if(!checkViews){
-                        var addViews =  blogss.blog[0].views.push(username);
-                        blogss.save();
-                        }
-                        
-                    });
+            
+            await blogs.find({}).then((foundBlogs) => {
+                foundBlogs.forEach((blogss) => {
+                    var checkViews = blogss.blog[0].views.includes(username)
+                    if(!checkViews){
+                    var addViews =  blogss.blog[0].views.push(username);
+                    blogss.save();
+                    }
                     
-                    response.render("blogs", {requestedBlogs:foundBlogs});
-                }).catch((err) => {
-                    console.log(err);
-                })
-            }
+                });
+                
+                response.render("blogs", {requestedBlogs:foundBlogs});
+            }).catch((err) => {
+                console.log(err);
+            })
+            
         }catch(err) {
             console.log(err);
             response.redirect("/signIn");
