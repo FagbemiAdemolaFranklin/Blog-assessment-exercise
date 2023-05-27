@@ -196,7 +196,7 @@ async function main() {
     });
 
     app.post("/blogs", async (request, response) => {
-        const {comment, newblog, title, content, addcomment, like} = request.body
+        const {comment, submit, title, content, addcomment, like} = request.body
         console.log(addcomment);
         try{
             if(addcomment) {
@@ -209,7 +209,7 @@ async function main() {
                 foundDocument.save();
                 response.redirect("/blogs");
                 }); 
-            }else if (newblog) {
+            }else if (submit) {
                 var newBlog = new blogs ({
                     blog:[{
                         author:{
